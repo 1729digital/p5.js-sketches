@@ -6,3 +6,8 @@ Bubbles of death...
 https://cdn.rawgit.com/aradhyamakkar97/p5.js-sketches/master/bubbles_of_death/index.html
 
 (drag using mouse)
+
+Better Bubbles of death .. 
+https://cdn.rawgit.com/aradhyamakkar97/p5.js-sketches/master/better_bubbles_of_death/index.html
+
+(drag using mouse)
