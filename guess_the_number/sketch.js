@@ -26,8 +26,10 @@ function newgamefunction(){
 x= floor(random(100));
 para.html('guess '+x);
 result.html('');
+slide.value(50);
 }
 function sbf(){
+  slide.value(50);
   var off = abs((x - slide.value()));
 
   result.html('you value was '+slide.value()+' you were off by '+off);
