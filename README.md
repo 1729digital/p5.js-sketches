@@ -14,3 +14,6 @@ https://cdn.rawgit.com/aradhyamakkar97/p5.js-sketches/master/better_bubbles_of_d
 
 Guess the number - stupid game 
 https://cdn.rawgit.com/aradhyamakkar97/p5.js-sketches/master/guess_the_number/index.html
+
+Prims algo visualization (use mouse click) 
+https://cdn.rawgit.com/aradhyamakkar97/p5.js-sketches/master/minimum_spanning_tree/index.html
