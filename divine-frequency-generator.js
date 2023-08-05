@@ -1,3 +1,8 @@
+
+// Divine Frequency Generator DFG
+// by >.<
+
+// Harmonious Numina: Euphonic Serenades Beneath the Numpad
 let pianoKeys = [];
 let keyLabels = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', 'Enter'];
 let keyNames = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', 'enter'];
@@ -91,3 +96,4 @@ class PianoKey {
     return this.playing;
   }
 }
+
