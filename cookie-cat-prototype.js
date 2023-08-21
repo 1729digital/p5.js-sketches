@@ -1,135 +1,132 @@
-let char1;
-let char2;
-let cookie;
-let cookieSize = 20;
-
-let score1 = 0;
-let score2 = 0;
-
-function setup() {
-  createCanvas(600, 400);
-
-  char1 = new Character(150, height / 2, color(100, 150, 255), 87, 83, 65, 68);  // W, S, A, D
-  char2 = new Character(450, height / 2, color(255, 150, 100), UP_ARROW, DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW);
-  spawnCookie();
-}
-
-function draw() {
-  background(220);
-
-  char1.update(char2.trail);
-  char2.update(char1.trail);
-
-  char1.showTrail();
-  char2.showTrail();
-
-  char1.show();
-  char2.show();
-
-  // Draw cookie
-  fill(50, 255, 50);
-  ellipse(cookie.x, cookie.y, cookieSize);
-
-  // Check for cookie collision
-  if (char1.eat(cookie)) {
-    score1++;
-    spawnCookie();
-  }
-
-  if (char2.eat(cookie)) {
-    score2++;
-    spawnCookie();
-  }
-
-  // Display score
-  textSize(20);
-  fill(0);
-  text(`Player 1 Score: ${score1}`, 10, 30);
-  text(`Player 2 Score: ${score2}`, width - 170, 30);
-}
-
-function spawnCookie() {
-  let x = random(cookieSize / 2, width - cookieSize / 2);
-  let y = random(cookieSize / 2, height - cookieSize / 2);
-  cookie = createVector(x, y);
-}
 
 class Character {
-  constructor(x, y, col, upKey, downKey, leftKey, rightKey) {
-    this.x = x;
-    this.y = y;
-    this.prevX = x;
-    this.prevY = y;
-    this.col = col;
-    this.size = 40;
-    this.speed = 4;
-    this.trail = [];
+  constructor(x, y, c, upKey, downKey, leftKey, rightKey) {
+    this.position = createVector(x, y);
+    this.color = c;
+    this.speed = 3;
     this.upKey = upKey;
     this.downKey = downKey;
     this.leftKey = leftKey;
     this.rightKey = rightKey;
+    this.trail = [];
+    this.trailLength = 66;  // You can adjust this for a longer or shorter trail.
   }
 
   update(opponentTrail) {
-    this.move();
-
-    // Check collision with opponent's trail
-    for (let pos of opponentTrail) {
-      let d = dist(this.x, this.y, pos.x, pos.y);
-      if (d < this.size / 2) {
-        // Revert to previous position
-        this.x = this.prevX;
-        this.y = this.prevY;
-      }
+    if (keyIsDown(this.upKey) && !this.collision(0, -this.speed, opponentTrail)) {
+      this.position.y -= this.speed;
+    }
+    if (keyIsDown(this.downKey) && !this.collision(0, this.speed, opponentTrail)) {
+      this.position.y += this.speed;
+    }
+    if (keyIsDown(this.leftKey) && !this.collision(-this.speed, 0, opponentTrail)) {
+      this.position.x -= this.speed;
+    }
+    if (keyIsDown(this.rightKey) && !this.collision(this.speed, 0, opponentTrail)) {
+      this.position.x += this.speed;
     }
 
-    this.trail.push({ x: this.x, y: this.y });
-    this.prevX = this.x;
-    this.prevY = this.y;
+    // Boundary checking
+    this.position.x = constrain(this.position.x, 0, width);
+    this.position.y = constrain(this.position.y, 0, height);
 
-    while (this.trail.length > 200) {
+    // Handle the trail
+    this.trail.push(this.position.copy());
+    while (this.trail.length > this.trailLength) {
       this.trail.shift();
     }
   }
 
   show() {
-    fill(this.col);
-    rect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+    fill(this.color);
+    rect(this.position.x, this.position.y, 20, 20);
   }
 
   showTrail() {
     for (let i = 0; i < this.trail.length; i++) {
-      let alpha = map(i, 0, this.trail.length, 0, 255);
-      let col = color(red(this.col), green(this.col), blue(this.col), alpha);
-      fill(col);
-      rect(this.trail[i].x - this.size / 2, this.trail[i].y - this.size / 2, this.size, this.size);
+      let pos = this.trail[i];
+      fill(this.color.levels[0], this.color.levels[1], this.color.levels[2], map(i, 0, this.trailLength, 0, 255));
+      rect(pos.x, pos.y, 20, 20);
     }
-  }
-
-  move() {
-    if (keyIsDown(this.upKey)) {
-      this.y -= this.speed;
-    }
-    if (keyIsDown(this.downKey)) {
-      this.y += this.speed;
-    }
-    if (keyIsDown(this.leftKey)) {
-      this.x -= this.speed;
-    }
-    if (keyIsDown(this.rightKey)) {
-      this.x += this.speed;
-    }
-
-    
-    this.x = constrain(this.x, 0 + this.size / 2, width - this.size / 2);
-    this.y = constrain(this.y, 0 + this.size / 2, height - this.size / 2);
   }
 
   eat(target) {
-    let d = dist(this.x, this.y, target.x, target.y);
-    if (d < this.size / 2 + cookieSize / 2) {
-      return true;
+    let d = dist(this.position.x, this.position.y, target.x, target.y);
+    return d < 20;
+  }
+
+  collision(dx, dy, opponentTrail) {
+    let newPos = createVector(this.position.x + dx, this.position.y + dy);
+    for (let pos of opponentTrail) {
+      if (newPos.dist(pos) < 20) return true;
     }
     return false;
   }
+}
+
+let char1A, char1B, char2A, char2B;
+let cookies = [];
+let cookieSize = 20;
+let score1 = 0;
+let score2 = 0;
+
+function setup() {
+  createCanvas(600, 400);
+  char1A = new Character(75, height / 3, color(100, 150, 255), 87, 83, 65, 68);  // W, S, A, D 
+  char1B = new Character(75, 2 * height / 3, color(100, 150, 255), UP_ARROW, DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW);
+  char2A = new Character(525, height / 3, color(255, 150, 100), 104, 101, 100, 102);  // 8, 5, 4, 6 on numpad
+  char2B = new Character(525, 2 * height / 3, color(255, 150, 100), 73, 75, 74, 76);  // I, K, J, L
+  for (let i = 0; i < 2; i++) {
+    spawnCookie();
+  }
+
+}
+
+function draw() {
+  background(220);
+
+  char1A.update([...char2A.trail, ...char2B.trail]);
+  char1B.update([...char2A.trail, ...char2B.trail]);
+  char2A.update([...char1A.trail, ...char1B.trail]);
+  char2B.update([...char1A.trail, ...char1B.trail]);
+
+  char1A.show();
+  char1B.show();
+  char2A.show();
+  char2B.show();
+  
+  char1A.showTrail();
+  char1B.showTrail();
+  char2A.showTrail();
+  char2B.showTrail();
+
+  
+  textSize(20);
+  fill(0);
+  text(`Player 1 Score: ${score1}`, 10, 30);
+  text(`Player 2 Score: ${score2}`, width - 190, 30);
+  
+  for (let c of cookies) {
+    fill(50, 255, 50);
+    ellipse(c.x, c.y, cookieSize);
+  }
+
+  for (let i = cookies.length - 1; i >= 0; i--) {
+    if (char1A.eat(cookies[i]) || char1B.eat(cookies[i]) || char2A.eat(cookies[i]) || char2B.eat(cookies[i])) {
+      if (char1A.eat(cookies[i]) || char1B.eat(cookies[i])) {
+        score1++;
+      } else {
+        score2++;
+      }
+      cookies.splice(i, 1);
+      spawnCookie();
+    }
+  }
+
+}
+
+function spawnCookie() {
+  let x = random(cookieSize / 2, width - cookieSize / 2);
+  let y = random(cookieSize / 2, height - cookieSize / 2);
+  cookies.push(createVector(x, y));
 }
